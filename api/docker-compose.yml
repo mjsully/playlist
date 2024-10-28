@@ -1,0 +1,13 @@
+services:
+  steam-dashboard-api:
+    image: steam-dashboard-api
+    build: .
+    container_name: steam-api
+    ports:
+      - 8000:8000
+    volumes:
+      - ./data/:/usr/src/app/data
+    env_file: .env
+    command: "uvicorn server:app --host 0.0.0.0"
+volumes:
+  steam-api-data:
