@@ -1,6 +1,6 @@
 services:
-  playlist-dashboard-api:
-    image: playlist-api:latest
+  playlist-api:
+    image: ghcr.io/mjsully/playlist-api:latest
     build: ./api/
     container_name: playlist-api
     ports:
@@ -10,14 +10,14 @@ services:
     env_file: .env
     command: "uvicorn server:app --host 0.0.0.0"
     restart: unless-stopped
-  # steam-dashboard-ui:
-  #   image: steam-dashboard-ui
-  #   build: ./web/
-  #   container_name: web
-  #   ports:
-  #     - 3000:3000
-  #   labels:
-  #     - "com.centurylinklabs.watchtower.enable=false"
-  #   restart: unless-stopped
+  playlist-ui:
+    image: ghcr.io/mjsully/playlist-ui
+    build: ./ui/
+    container_name: playlist-ui
+    ports:
+      - 3000:3000
+    # labels:
+    #   - "com.centurylinklabs.watchtower.enable=false"
+    restart: unless-stopped
 volumes:
   playlist-api-data:
