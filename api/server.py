@@ -10,6 +10,7 @@ import sqlite3
 import httpx
 import asyncio
 import requests
+import constants
 from datetime import datetime
 import models
 from sqlalchemy import create_engine, update
@@ -460,14 +461,33 @@ async def steam_user_status():
 
     user = get_user()
 
-    url = f'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={user.api_key}&steamids={user.user_id}'
+    url = f'{constants.PLAYER_SUMMARIES_URL}?key={user.api_key}&steamids={user.user_id}'
 
-    results = requests.get(url)
-    results = results.json()
-    if "response" in results and len(results['response']['players']) > 0:
-        return JSONResponse(status_code=200, content=results["response"]["players"][0])
-    else:
-        return JSONResponse(status_code=400, content="No data available")
+    async with httpx.AsyncClient() as client:
+
+        try:
+            
+            results = await client.get(url)
+            results.raise_for_status()
+            results = results.json()
+            return JSONResponse(
+                status_code=200, 
+                content=results["response"]["players"][0]
+            )
+
+        except (httpx.HTTPError) as e:
+
+            return JSONResponse(
+                status_code = e.response.status_code,
+                content = repr(e)
+            )
+
+        except (KeyError, json.decoder.JSONDecodeError) as e:
+
+            return JSONResponse(
+                status_code = 500,
+                content = repr(e)
+            )
 
 @app.get('/steam/user/recent')
 async def steam_user_recent():
@@ -476,11 +496,30 @@ async def steam_user_recent():
 
     user = get_user()
 
-    url = f'http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key={user.api_key}&steamid={user.user_id}&format=json'
+    url = f'{constants.RECENTLY_PLAYED_GAMES_URL}?key={user.api_key}&steamid={user.user_id}&format=json'
 
-    results = requests.get(url)
-    results = results.json()
-    if "response" in results and results['response']['total_count'] > 0:
-        return JSONResponse(status_code=200, content=results["response"]["games"])
-    else:
-        return JSONResponse(status_code=400, content="No recent game data.")
+    async with httpx.AsyncClient() as client:
+
+        try:
+            
+            results = await client.get(url)
+            results.raise_for_status()
+            results = results.json()
+            return JSONResponse(
+                status_code=200, 
+                content=results["response"]["games"]
+            )
+
+        except (httpx.HTTPError) as e:
+
+            return JSONResponse(
+                status_code = e.response.status_code,
+                content = repr(e)
+            )
+
+        except (KeyError, json.decoder.JSONDecodeError) as e:
+
+            return JSONResponse(
+                status_code = 500,
+                content = repr(e)
+            )
