@@ -1,0 +1,14 @@
+{
+	"name": "playlist-ui",
+	"image": "node:latest",
+	"extensions": [
+	  "ms-python.eslint",
+	  "github.vscode-github-actions"
+	],
+	"forwardPorts": [3000],
+	"workspaceMount": "source=${localWorkspaceFolder}/ui,target=/workspace,type=bind",
+	"workspaceFolder": "/workspace",
+	"postCreateCommand": "cd src/; npm run dev"
+  }
+  
+  
