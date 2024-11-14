@@ -11,7 +11,7 @@
 	"forwardPorts": [8000],
 	"workspaceMount": "source=${localWorkspaceFolder}/api,target=/workspace,type=bind",
 	"workspaceFolder": "/workspace",
-	"postCreateCommand": "pip install -r requirements.txt",
+	"postCreateCommand": "pip install -r requirements-dev.txt",
 	"runArgs": ["--env-file",".devcontainer/api/.env"]
   }
   
