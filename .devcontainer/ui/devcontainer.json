@@ -8,7 +8,7 @@
 	"forwardPorts": [3000],
 	"workspaceMount": "source=${localWorkspaceFolder}/ui,target=/workspace,type=bind",
 	"workspaceFolder": "/workspace",
-	"postCreateCommand": "cd src/; npm run dev"
+	"postCreateCommand": "cd src/; npm install"
   }
   
   
