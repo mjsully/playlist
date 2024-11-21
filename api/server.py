@@ -1,23 +1,24 @@
-import os
 import json
-from dataclasses import dataclass
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 import logging
-import sqlite3
-import httpx
-import asyncio
-import requests
-import constants
+import os
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from datetime import datetime
-import models
+
+import httpx
+import requests
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import create_engine, update
 from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import sessionmaker
 from tqdm import tqdm
+
+import constants
+import models
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -47,26 +48,26 @@ class SteamUser:
     api_key: str
     user_id: str
 
+
 def get_user():
 
     api_key = os.getenv('API_KEY')
     user_id = os.getenv('USER_ID')
-    logging.debug(f'API_KEY: {api_key}')
-    logging.debug(f'USER_ID: {user_id}')
+    logging.debug('API_KEY: %s', api_key)
+    logging.debug('USER_ID: %s', user_id)
 
-    if api_key == None:
+    if api_key is None:
         raise Exception('Please set Steam API key.')
-    if user_id == None:
+    if user_id is None:
         raise Exception('Please set Steam User ID.')
-    
-    user = SteamUser(api_key = api_key, user_id = user_id)
+
+    user = SteamUser(api_key=api_key, user_id=user_id)
 
     return user
 
+
 # Check necessary env variables exist and create user
 def initialise():
-
-    user = get_user()
 
     if not os.path.exists('data'):
         os.mkdir('data')
@@ -75,9 +76,10 @@ def initialise():
         create_database()
         build_steam_database()
     else:
-        logging.debug('DB exists, refreshing!')    
+        logging.debug('DB exists, refreshing!')
     build_user_database()
     # build_steam_database()
+
 
 # Use ORM to create database from models
 def create_database():
@@ -85,12 +87,14 @@ def create_database():
     engine = create_engine(f"sqlite:///{DB_FILEPATH}")
     models.Base.metadata.create_all(engine)
 
+
 def get_session():
 
     engine = create_engine(f"sqlite:///{DB_FILEPATH}")
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session 
+    new_session = sessionmaker(bind=engine)
+    session = new_session()
+    return session
+
 
 # Build database containing all Steam games
 def build_steam_database():
@@ -114,20 +118,20 @@ def build_steam_database():
             name = result['name'].replace("'", "’")
 
             if name != '':
-                try:        
+                try:
                     session.execute(
                         insert(models.SteamApps).values(
-                            appid = appid,
-                            name = name
+                            appid=appid,
+                            name=name
                         )
                     )
                 except SQLAlchemyError as e:
                     error = e
-        
+
             else:
                 nonames.append(appid)
 
-        logging.debug(f"Size of nonames: {len(nonames)}")
+        logging.debug("Size of nonames %s:", len(nonames))
 
     session.commit()
     results = session.query(
@@ -135,12 +139,13 @@ def build_steam_database():
     ).all()
     session.execute(
         insert(models.SteamAppsMetadata).values(
-            size = len(results),
-            timestamp = datetime.now()
+            size=len(results),
+            timestamp=datetime.now()
         )
     )
     session.commit()
     session.close()
+
 
 # Build database of user's owned games
 def build_user_database():
@@ -157,9 +162,9 @@ def build_user_database():
             appid = result['appid']
             session.execute(
                 insert(models.SteamUserApps).values(
-                    appid = appid,
-                    now_playing = 0,
-                    favourite = 0
+                    appid=appid,
+                    now_playing=0,
+                    favourite=0
                 )
             )
         except SQLAlchemyError as e:
@@ -171,15 +176,15 @@ def build_user_database():
         try:
             session.execute(
                 insert(models.SteamUserAppsPlaytime).values(
-                    appid = result['appid'],
-                    playtime_forever = result['playtime_forever'],
-                    playtime_windows = result['playtime_windows_forever'],
-                    playtime_mac = result['playtime_mac_forever'],
-                    playtime_linux = result['playtime_linux_forever'],
-                    playtime_deck = result['playtime_deck_forever'],
-                    playtime_disconnected = result['playtime_disconnected'],
-                    last_played = result['rtime_last_played'],
-                    timestamp = datetime.now()
+                    appid=result['appid'],
+                    playtime_forever=result['playtime_forever'],
+                    playtime_windows=result['playtime_windows_forever'],
+                    playtime_mac=result['playtime_mac_forever'],
+                    playtime_linux=result['playtime_linux_forever'],
+                    playtime_deck=result['playtime_deck_forever'],
+                    playtime_disconnected=result['playtime_disconnected'],
+                    last_played=result['rtime_last_played'],
+                    timestamp=datetime.now()
                 )
             )
         except SQLAlchemyError as e:
@@ -188,11 +193,13 @@ def build_user_database():
     session.commit()
     session.close()
 
+
 def convert_timestamp(timestamp):
     return datetime.fromtimestamp(timestamp).strftime("%d/%m/%Y")
 
-def convert_datetime(datetime):
-    return datetime.strftime("%H:%M (%d/%m/%Y)")
+
+def convert_datetime(dt):
+    return dt.strftime("%H:%M (%d/%m/%Y)")
 
 # def get_achievements(session, user, id):
 
@@ -213,7 +220,7 @@ def convert_datetime(datetime):
 #             for result in results['playerstats']['achievements']:
 #                 achievements += result["achieved"]
 #                 total_achievements += 1
-            
+
 #     session.execute(
 #         insert(models.SteamAppAchievements).values(
 #             appid = id,
@@ -225,10 +232,11 @@ def convert_datetime(datetime):
 #     session.commit()
 #     # session.close()
 
+
 @app.get('/steam/games')
 async def steam_games(
-    sort="playtime", 
-    order="desc", 
+    sort="playtime",
+    order="desc",
     playedOnly=None,
     unplayedOnly=None,
     favouritesOnly=None,
@@ -244,14 +252,14 @@ async def steam_games(
         sort_by = models.SteamApps.name
     elif sort == "lastPlayed":
         sort_by = models.SteamUserAppsPlaytime.last_played
-    else: 
-        sort_by = models.SteamUserAppsPlaytime.playtime_forever 
+    else:
+        sort_by = models.SteamUserAppsPlaytime.playtime_forever
 
     session = get_session()
-    
+
     # Order games either in ascending or descending sort order
     if order == "desc":
-        order_by = sort_by.desc() 
+        order_by = sort_by.desc()
     else:
         order_by = sort_by.asc()
 
@@ -299,23 +307,23 @@ async def steam_games(
     if results:
         results_list = []
         for result in results:
-            SteamUserApps = result[0]
-            SteamApps = result[1]
-            SteamUserAppsPlaytime = result[2]
+            steam_user_apps = result[0]
+            steam_apps = result[1]
+            steam_user_apps_playtime = result[2]
             results_list.append({
-                "id": SteamUserApps.id,
-                "name": SteamApps.name,
-                "playtime_forever": SteamUserAppsPlaytime.playtime_forever,
-                "last_played": convert_timestamp(SteamUserAppsPlaytime.last_played),
-                "unplayed": (SteamUserAppsPlaytime.playtime_forever==0),
-                "now_playing": SteamUserApps.now_playing,
-                "favourite": SteamUserApps.favourite,
-                "img": f"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamUserApps.appid}/header.jpg",
+                "id": steam_user_apps.id,
+                "name": steam_apps.name,
+                "playtime_forever": steam_user_apps_playtime.playtime_forever,
+                "last_played": convert_timestamp(steam_user_apps_playtime.last_played),
+                "unplayed": (steam_user_apps_playtime.playtime_forever == 0),
+                "now_playing": steam_user_apps.now_playing,
+                "favourite": steam_user_apps.favourite,
+                "img": f"https://cdn.cloudflare.steamstatic.com/steam/apps/{steam_user_apps.appid}/header.jpg",
             })
 
         return JSONResponse(status_code=200, content=results_list)
-    else:
-        return JSONResponse(status_code=400, content="No data available.")
+    return JSONResponse(status_code=400, content="No data available.")
+
 
 @app.get('/steam/game/{id}')
 async def steam_game_id(id: str):
@@ -341,22 +349,22 @@ async def steam_game_id(id: str):
     session.close()
     if not results:
         return JSONResponse(status_code=404, content="No data found for the requested ID.")
-    else:
-        SteamUserApps = results[0]
-        SteamApps = results[1]
-        SteamUserAppsPlaytime = results[2]
-        results_dict = {
-            "id": SteamUserApps.appid,
-            "name": SteamApps.name,
-            "playtime": round(SteamUserAppsPlaytime.playtime_forever/60, 1),
-            "unplayed": (SteamUserAppsPlaytime.playtime_forever==0),
-            "now_playing": SteamUserApps.now_playing,
-            "favourite": SteamUserApps.favourite,
-            "last_played": convert_timestamp(SteamUserAppsPlaytime.last_played),
-            "img": f"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamUserApps.appid}/header.jpg",
-            "timestamp": convert_datetime(SteamUserAppsPlaytime.timestamp),
-        }
-        return JSONResponse(status_code=200, content=results_dict)
+    steam_user_apps = results[0]
+    steam_apps = results[1]
+    steam_user_apps_playtime = results[2]
+    results_dict = {
+        "id": steam_user_apps.appid,
+        "name": steam_apps.name,
+        "playtime": round(steam_user_apps_playtime.playtime_forever/60, 1),
+        "unplayed": (steam_user_apps_playtime.playtime_forever == 0),
+        "now_playing": steam_user_apps.now_playing,
+        "favourite": steam_user_apps.favourite,
+        "last_played": convert_timestamp(steam_user_apps_playtime.last_played),
+        "img": f"https://cdn.cloudflare.steamstatic.com/steam/apps/{steam_user_apps.appid}/header.jpg",
+        "timestamp": convert_datetime(steam_user_apps_playtime.timestamp),
+    }
+    return JSONResponse(status_code=200, content=results_dict)
+
 
 @app.get('/steam/game/{id}/favourite')
 async def steam_game_id_favourite(id: str):
@@ -370,26 +378,20 @@ async def steam_game_id_favourite(id: str):
     ).one()
 
     if result:
-
         favourite = 1 if result.favourite == 0 else 0
-
         update_stmt = update(
             models.SteamUserApps
         ).where(
             models.SteamUserApps.id == id
         ).values(
-            favourite = favourite
+            favourite=favourite
         )
-
         session.execute(update_stmt)
         session.commit()
         session.close()
-
         return JSONResponse(status_code=200, content="")
+    return JSONResponse(status_code=404, content="No data available")
 
-    else:
-
-        return JSONResponse(status_code=404, content="No data available")
 
 @app.get('/steam/stats')
 async def steam_stats():
@@ -409,7 +411,7 @@ async def steam_stats():
     ).order_by(
         models.SteamUserAppsPlaytime.timestamp.desc()
     ).all()
-    
+
     if results:
 
         processed_ids = []
@@ -421,24 +423,22 @@ async def steam_stats():
         last_played_name = None
 
         for result in results:
-
-            SteamUserApps = result[0]
-            SteamApps = result[1]
-            SteamUserAppsPlaytime = result[2]
-
-            if SteamApps.appid not in processed_ids:
-                total_playtime += SteamUserAppsPlaytime.playtime_forever
-                if SteamUserAppsPlaytime.last_played > last_played_time:
-                    last_played_time = SteamUserAppsPlaytime.last_played
-                    last_played_name = SteamApps.name
-                if SteamUserAppsPlaytime.playtime_forever == 0: 
+            steam_user_apps = result[0]
+            steam_apps = result[1]
+            steam_user_apps_playtime = result[2]
+            if steam_apps.appid not in processed_ids:
+                total_playtime += steam_user_apps_playtime.playtime_forever
+                if steam_user_apps_playtime.last_played > last_played_time:
+                    last_played_time = steam_user_apps_playtime.last_played
+                    last_played_name = steam_apps.name
+                if steam_user_apps_playtime.playtime_forever == 0:
                     total_unplayed += 1
-                if SteamUserApps.now_playing == 1:
+                if steam_user_apps.now_playing == 1:
                     total_now_playing += 1
-                if SteamUserApps.favourite == 1:
+                if steam_user_apps.favourite == 1:
                     total_favourites += 1
-                processed_ids.append(SteamApps.appid)
-            
+                processed_ids.append(steam_apps.appid)
+
             results_dict = {
                 "count": len(processed_ids),
                 "playtime": total_playtime,
@@ -449,10 +449,8 @@ async def steam_stats():
             }
 
         return JSONResponse(status_code=200, content=results_dict)
+    return JSONResponse(status_code=400, content="No data available.")
 
-    else:
-
-        return JSONResponse(status_code=400, content="No data available.")
 
 @app.get('/steam/user/status')
 async def steam_user_status():
@@ -466,28 +464,29 @@ async def steam_user_status():
     async with httpx.AsyncClient() as client:
 
         try:
-            
+
             results = await client.get(url)
             results.raise_for_status()
             results = results.json()
             return JSONResponse(
-                status_code=200, 
+                status_code=200,
                 content=results["response"]["players"][0]
             )
 
         except (httpx.HTTPError) as e:
 
             return JSONResponse(
-                status_code = e.response.status_code,
-                content = repr(e)
+                status_code=e.response.status_code,
+                content=repr(e)
             )
 
         except (KeyError, json.decoder.JSONDecodeError) as e:
 
             return JSONResponse(
-                status_code = 500,
-                content = repr(e)
+                status_code=500,
+                content=repr(e)
             )
+
 
 @app.get('/steam/user/recent')
 async def steam_user_recent():
@@ -501,25 +500,25 @@ async def steam_user_recent():
     async with httpx.AsyncClient() as client:
 
         try:
-            
+
             results = await client.get(url)
             results.raise_for_status()
             results = results.json()
             return JSONResponse(
-                status_code=200, 
+                status_code=200,
                 content=results["response"]["games"]
             )
 
         except (httpx.HTTPError) as e:
 
             return JSONResponse(
-                status_code = e.response.status_code,
-                content = repr(e)
+                status_code=e.response.status_code,
+                content=repr(e)
             )
 
         except (KeyError, json.decoder.JSONDecodeError) as e:
 
             return JSONResponse(
-                status_code = 500,
-                content = repr(e)
+                status_code=500,
+                content=repr(e)
             )
