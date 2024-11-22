@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import httpx
-import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -101,37 +100,31 @@ def build_steam_database():
 
     session = get_session()
 
-    # url = 'https://api.steampowered.com/ISteamApps/GetAppList/v2/'
-    # results = requests.get(url)
-    # results = results.json()['applist']['apps']
+    url = 'https://api.steampowered.com/ISteamApps/GetAppList/v2/'
 
-    os.system("rm ./data/steam-database.json")
-    os.system("curl https://api.steampowered.com/ISteamApps/GetAppList/v2/ >> ./data/steam-database.json")
+    results = httpx.get(url)
+    results = results.json()["applist"]["apps"]
+    nonames = []
 
-    with open("./data/steam-database.json") as input_json:
+    for result in tqdm(results):
+        appid = result['appid']
+        name = result['name'].replace("'", "’")
 
-        results = json.load(input_json)["applist"]["apps"]
-        nonames = []
-
-        for result in tqdm(results):
-            appid = result['appid']
-            name = result['name'].replace("'", "’")
-
-            if name != '':
-                try:
-                    session.execute(
-                        insert(models.SteamApps).values(
-                            appid=appid,
-                            name=name
-                        )
+        if name != '':
+            try:
+                session.execute(
+                    insert(models.SteamApps).values(
+                        appid=appid,
+                        name=name
                     )
-                except SQLAlchemyError as e:
-                    error = e
+                )
+            except SQLAlchemyError as e:
+                error = e
 
-            else:
-                nonames.append(appid)
+        else:
+            nonames.append(appid)
 
-        logging.debug("Size of nonames %s:", len(nonames))
+    logging.debug("Size of nonames %s:", len(nonames))
 
     session.commit()
     results = session.query(
@@ -155,7 +148,7 @@ def build_user_database():
 
     url = f'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={user.api_key}&steamid={user.user_id}'
 
-    results = requests.get(url)
+    results = httpx.get(url)
     results = results.json()['response']['games']
     for result in results:
         try:
