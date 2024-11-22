@@ -40,9 +40,12 @@ app.add_middleware(
 
 DB_FILEPATH = "data/database.db"
 
+
 # Create dataclass for Steam account
 @dataclass
 class SteamUser:
+
+    """Dataclass to hold Steam user credentials"""
 
     api_key: str
     user_id: str
@@ -187,11 +190,13 @@ def build_user_database():
     session.close()
 
 
-def convert_timestamp(timestamp):
-    return datetime.fromtimestamp(timestamp).strftime("%d/%m/%Y")
+def convert_timestamp(ts):
+    """Convert timestamp to human readable timestamp."""
+    return datetime.fromtimestamp(ts).strftime("%d/%m/%Y")
 
 
 def convert_datetime(dt):
+    """Format datetime object to human readable timestamp."""
     return dt.strftime("%H:%M (%d/%m/%Y)")
 
 # def get_achievements(session, user, id):
@@ -240,7 +245,7 @@ async def steam_games(
     sort_by = None
     order_by = None
 
-     # Sort games either alphabetically, by date last played, or total playtime (default)
+    # Sort games either alphabetically, by date last played, or total playtime (default)
     if sort == "alphabetical":
         sort_by = models.SteamApps.name
     elif sort == "lastPlayed":
@@ -320,7 +325,6 @@ async def steam_games(
 
 @app.get('/steam/game/{id}')
 async def steam_game_id(id: str):
-
 
     """Retrieve data for a given game. The ID in the URL corresponds to the database ID of the game in the SteamUserApps table."""
 
