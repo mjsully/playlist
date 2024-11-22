@@ -22,7 +22,7 @@ import models
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    initialise()
+    await initialise()
     yield
     logging.debug("Exiting!")
 
@@ -69,17 +69,17 @@ def get_user():
 
 
 # Check necessary env variables exist and create user
-def initialise():
+async def initialise():
 
     if not os.path.exists('data'):
         os.mkdir('data')
     if not os.path.exists(DB_FILEPATH):
         logging.debug('DB does not exist!')
         create_database()
-        build_steam_database()
+        await build_steam_database()
     else:
         logging.debug('DB exists, refreshing!')
-    build_user_database()
+    await build_user_database()
     # build_steam_database()
 
 
@@ -99,33 +99,43 @@ def get_session():
 
 
 # Build database containing all Steam games
-def build_steam_database():
+async def build_steam_database():
 
     session = get_session()
 
     url = 'https://api.steampowered.com/ISteamApps/GetAppList/v2/'
 
-    results = httpx.get(url)
-    results = results.json()["applist"]["apps"]
-    nonames = []
+    results = None
 
-    for result in tqdm(results):
-        appid = result['appid']
-        name = result['name'].replace("'", "’")
+    async with httpx.AsyncClient() as client:
 
-        if name != '':
-            try:
-                session.execute(
-                    insert(models.SteamApps).values(
-                        appid=appid,
-                        name=name
+        results = await client.get(url)
+        try:
+            results.raise_for_status()
+            results = results.json()["applist"]["apps"]
+            nonames = []
+        except (httpx.HTTPError) as e:
+            logging.error(repr(e))
+
+    if results:
+
+        for result in tqdm(results):
+            appid = result['appid']
+            name = result['name'].replace("'", "’")
+
+            if name != '':
+                try:
+                    session.execute(
+                        insert(models.SteamApps).values(
+                            appid=appid,
+                            name=name
+                        )
                     )
-                )
-            except SQLAlchemyError as e:
-                error = e
+                except SQLAlchemyError as e:
+                    error = e
 
-        else:
-            nonames.append(appid)
+            else:
+                nonames.append(appid)
 
     logging.debug("Size of nonames %s:", len(nonames))
 
@@ -144,48 +154,57 @@ def build_steam_database():
 
 
 # Build database of user's owned games
-def build_user_database():
+async def build_user_database():
 
     user = get_user()
     session = get_session()
 
     url = f'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={user.api_key}&steamid={user.user_id}'
 
-    results = httpx.get(url)
-    results = results.json()['response']['games']
-    for result in results:
-        try:
-            appid = result['appid']
-            session.execute(
-                insert(models.SteamUserApps).values(
-                    appid=appid,
-                    now_playing=0,
-                    favourite=0
-                )
-            )
-        except SQLAlchemyError as e:
-            # logging.error(e)
-            error = e
+    results = None
 
-    session.commit()
-    for result in results:
+    async with httpx.AsyncClient() as client:
+
+        results = await client.get(url)
         try:
-            session.execute(
-                insert(models.SteamUserAppsPlaytime).values(
-                    appid=result['appid'],
-                    playtime_forever=result['playtime_forever'],
-                    playtime_windows=result['playtime_windows_forever'],
-                    playtime_mac=result['playtime_mac_forever'],
-                    playtime_linux=result['playtime_linux_forever'],
-                    playtime_deck=result['playtime_deck_forever'],
-                    playtime_disconnected=result['playtime_disconnected'],
-                    last_played=result['rtime_last_played'],
-                    timestamp=datetime.now()
+            results.raise_for_status()
+            results = results.json()['response']['games']
+        except (httpx.HTTPError) as e:
+            logging.error(repr(e))
+    if results:
+        for result in results:
+            try:
+                appid = result['appid']
+                session.execute(
+                    insert(models.SteamUserApps).values(
+                        appid=appid,
+                        now_playing=0,
+                        favourite=0
+                    )
                 )
-            )
-        except SQLAlchemyError as e:
-            # logging.error(e)
-            error = e
+            except SQLAlchemyError as e:
+                # logging.error(e)
+                error = e
+
+        session.commit()
+        for result in results:
+            try:
+                session.execute(
+                    insert(models.SteamUserAppsPlaytime).values(
+                        appid=result['appid'],
+                        playtime_forever=result['playtime_forever'],
+                        playtime_windows=result['playtime_windows_forever'],
+                        playtime_mac=result['playtime_mac_forever'],
+                        playtime_linux=result['playtime_linux_forever'],
+                        playtime_deck=result['playtime_deck_forever'],
+                        playtime_disconnected=result['playtime_disconnected'],
+                        last_played=result['rtime_last_played'],
+                        timestamp=datetime.now()
+                    )
+                )
+            except SQLAlchemyError as e:
+                # logging.error(e)
+                error = e
     session.commit()
     session.close()
 
