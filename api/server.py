@@ -538,3 +538,85 @@ async def steam_user_recent():
                 status_code=500,
                 content=repr(e)
             )
+
+
+async def igdb_auth():
+
+    CLIENT_ID = os.getenv("IGDB_CLIENT_ID")
+    CLIENT_SECRET = os.getenv("IGDB_CLIENT_SECRET")
+    GRANT_TYPE = "client_credentials"
+
+    url = f'https://id.twitch.tv/oauth2/token?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&grant_type={GRANT_TYPE}'
+
+    async with httpx.AsyncClient() as client:
+
+        try:
+
+            results = await client.post(url)
+            results.raise_for_status()
+            results = results.json()
+            return results
+                
+        except (httpx.HTTPError) as e:
+
+            return JSONResponse(
+                status_code=e.response.status_code,
+                content=repr(e)
+            )
+
+        except (KeyError, json.decoder.JSONDecodeError) as e:
+
+            return JSONResponse(
+                status_code=500,
+                content=repr(e)
+            )
+
+
+@app.get('/igdb/query')
+async def igdb_query(query: str):
+
+    """Make a query to IGDB."""
+
+    auth = await igdb_auth()
+
+    HEADERS = {
+        "Client-ID": os.getenv("IGDB_CLIENT_ID"),
+        "Authorization": f"Bearer {auth["access_token"]}"
+    }
+
+    # https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1zhr.jpg
+
+    async with httpx.AsyncClient() as client:
+
+        try:
+
+            results = await client.post(
+                url="https://api.igdb.com/v4/search",
+                data=f'fields *; search "{query}"; limit 50;',
+                headers=HEADERS
+            )
+            results.raise_for_status()
+            results = results.json()
+
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "query": query,
+                    "access_token_expiry": auth["expires_in"],
+                    "results": results
+                }
+            )
+
+        except (httpx.HTTPError) as e:
+
+            return JSONResponse(
+                status_code=e.response.status_code,
+                content=repr(e)
+            )
+
+        except (KeyError, json.decoder.JSONDecodeError) as e:
+
+            return JSONResponse(
+                status_code=500,
+                content=repr(e)
+            )
