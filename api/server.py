@@ -581,7 +581,7 @@ async def igdb_query(query: str):
 
     HEADERS = {
         "Client-ID": os.getenv("IGDB_CLIENT_ID"),
-        "Authorization": f"Bearer {auth["access_token"]}"
+        "Authorization": f'Bearer {auth["access_token"]}'
     }
 
     # https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1zhr.jpg
