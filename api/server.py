@@ -80,7 +80,7 @@ async def initialise():
     else:
         logging.debug('DB exists, refreshing!')
     await build_user_database()
-    # build_steam_database()
+    await build_steam_database()
 
 
 # Use ORM to create database from models
@@ -249,6 +249,15 @@ def convert_datetime(dt):
 #     session.commit()
 #     # session.close()
 
+@app.get('/steam/refresh')
+async def refresh():
+
+    await build_steam_database()
+    await build_user_database
+    return JSONResponse(
+        status_code=200,
+        content={}
+    )
 
 @app.get('/steam/games')
 async def steam_games(
