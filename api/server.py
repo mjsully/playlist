@@ -253,7 +253,7 @@ def convert_datetime(dt):
 async def refresh():
 
     await build_steam_database()
-    await build_user_database
+    await build_user_database()
     return JSONResponse(
         status_code=200,
         content={}
