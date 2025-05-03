@@ -1,4 +1,7 @@
--r requirements.txt
+# dev requirements
 isort
 pylint
 flake8
+bump2version
+# dependencies
+-r requirements.txt
