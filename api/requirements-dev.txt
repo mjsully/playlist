@@ -2,3 +2,5 @@
 isort
 pylint
 flake8
+bump2version
+black

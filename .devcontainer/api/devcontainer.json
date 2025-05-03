@@ -3,8 +3,8 @@
 	"image": "python:3.13-alpine",
 	"extensions": [
 	  "ms-python.python",
-	  "ms-python.vscode-pylance",
-	  "ms-python.pylint",
+	//   "ms-python.vscode-pylance",
+	//   "ms-python.pylint",
 	  "github.vscode-github-actions",
 	  "ms-python.flake8"
 	],
@@ -12,7 +12,7 @@
 	"workspaceMount": "source=${localWorkspaceFolder}/api,target=/workspace,type=bind",
 	"workspaceFolder": "/workspace",
 	"postCreateCommand": "pip install -r requirements-dev.txt",
-	"runArgs": ["--env-file",".devcontainer/api/.env"]
+	// "runArgs": ["--env-file",".devcontainer/api/.env"]
   }
   
   
