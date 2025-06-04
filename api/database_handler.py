@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, create_engine, func
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, UniqueConstraint, create_engine, func
 from sqlalchemy.orm import Session
 import os
 from neologger import NeoLogger
@@ -38,6 +38,9 @@ class SteamApps(Base):
 class SteamPlaytime(Base):
 
     __tablename__ = "steam_playtime"
+    __table_args__ = (
+        UniqueConstraint("appid", "playtime_forever", name="steam_playtime_constraint_1"),
+    )
     id = Column(Integer, primary_key=True)
     appid = Column(Integer, ForeignKey("steam_apps.appid"), unique=True)
     playtime_forever = Column(Integer)
@@ -88,6 +91,35 @@ class DatabaseHandler:
         _, session = self.get_engine_session()
         apps = session.query(SteamApps).all()
         return [i.to_dict() for i in apps]
+    
+    async def name_apps(self, names):
+
+        names = names.get("applist")
+        names = names.get("apps")
+        apps = await self.get_apps()
+        appids = [appid.get("appid") for appid in apps]
+
+        self.logger.log_this(f"{len(names)} in list - processing")
+
+        matches = []
+
+        for name in names:
+
+            if name.get("appid") in appids:
+
+                matches.append(name)
+
+        self.logger.log_this(f"Found {len(matches)} matches")
+
+        _, session = self.get_engine_session()
+
+        for match in matches:
+
+            app = session.query(SteamApps).filter_by(appid=match.get("appid")).one()
+            app.name = match.get("name")
+        
+        session.commit()
+        session.close()
 
     async def insert_apps(self, apps):
 

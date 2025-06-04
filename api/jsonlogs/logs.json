@@ -1,0 +1,82 @@
+[
+    {
+        "timestamp": "2025-06-04 20:17:46.026",
+        "type": "INFO",
+        "source": "/workspace/run.py",
+        "function": "lifespan",
+        "log": "--- Initialising ---"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:46.028",
+        "type": "INFO",
+        "source": "/workspace/database_handler.py",
+        "function": "create_tables",
+        "log": "Attempting to create tables"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:46.078",
+        "type": "INFO",
+        "source": "/workspace/database_handler.py",
+        "function": "create_tables",
+        "log": "Created tables"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:46.337",
+        "type": "INFO",
+        "source": "/workspace/database_handler.py",
+        "function": "insert_apps",
+        "log": "384 games to be processed"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:46.379",
+        "type": "ERROR",
+        "source": "/workspace/database_handler.py",
+        "function": "insert_apps",
+        "log": "<class 'sqlalchemy.exc.IntegrityError'>: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint \"steam_apps_appid_key\"\nDETAIL:  Key (appid)=(220) already exists.\n\n[SQL: INSERT INTO steam_apps (name, appid, playing, favourite, updated) SELECT p0::VARCHAR, p1::INTEGER, p2::BOOLEAN, p3::BOOLEAN, p4::TIMESTAMP WITH TIME ZONE FROM (VALUES (%(name__0)s, %(appid__0)s, %(playing__0)s, %(favourite__0)s, %(updated__0)s, 0), ( ... 35383 characters truncated ...  sen_counter) ORDER BY sen_counter RETURNING steam_apps.id, steam_apps.added, steam_apps.id AS id__1]\n[parameters: {'appid__0': 220, 'name__0': None, 'playing__0': False, 'favourite__0': False, 'updated__0': None, 'appid__1': 320, 'name__1': None, 'playing__1': False, 'favourite__1': False, 'updated__1': None, 'appid__2': 360, 'name__2': None, 'playing__2': False, 'favourite__2': False, 'updated__2': None, 'appid__3': 6880, 'name__3': None, 'playing__3': False, 'favourite__3': False, 'updated__3': None, 'appid__4': 400, 'name__4': None, 'playing__4': False, 'favourite__4': False, 'updated__4': None, 'appid__5': 11450, 'name__5': None, 'playing__5': False, 'favourite__5': False, 'updated__5': None, 'appid__6': 21000, 'name__6': None, 'playing__6': False, 'favourite__6': False, 'updated__6': None, 'appid__7': 12200, 'name__7': None, 'playing__7': False, 'favourite__7': False, 'updated__7': None, 'appid__8': 9480, 'name__8': None, 'playing__8': False, 'favourite__8': False, 'updated__8': None, 'appid__9': 22330, 'name__9': None, 'playing__9': False, 'favourite__9': False, 'updated__9': None ... 1820 parameters truncated ... 'appid__374': 1180660, 'name__374': None, 'playing__374': False, 'favourite__374': False, 'updated__374': None, 'appid__375': 2494780, 'name__375': None, 'playing__375': False, 'favourite__375': False, 'updated__375': None, 'appid__376': 70, 'name__376': None, 'playing__376': False, 'favourite__376': False, 'updated__376': None, 'appid__377': 2725560, 'name__377': None, 'playing__377': False, 'favourite__377': False, 'updated__377': None, 'appid__378': 2727650, 'name__378': None, 'playing__378': False, 'favourite__378': False, 'updated__378': None, 'appid__379': 2737300, 'name__379': None, 'playing__379': False, 'favourite__379': False, 'updated__379': None, 'appid__380': 2824660, 'name__380': None, 'playing__380': False, 'favourite__380': False, 'updated__380': None, 'appid__381': 235900, 'name__381': None, 'playing__381': False, 'favourite__381': False, 'updated__381': None, 'appid__382': 2842040, 'name__382': None, 'playing__382': False, 'favourite__382': False, 'updated__382': None, 'appid__383': 1249970, 'name__383': None, 'playing__383': False, 'favourite__383': False, 'updated__383': None}]\n(Background on this error at: https://sqlalche.me/e/20/gkpj)"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:46.382",
+        "type": "ERROR",
+        "source": "/workspace/database_handler.py",
+        "function": "insert_apps",
+        "log": "<class 'sqlalchemy.exc.PendingRollbackError'>: This Session's transaction has been rolled back due to a previous exception during flush. To begin a new transaction with this Session, first issue Session.rollback(). Original exception was: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint \"steam_apps_appid_key\"\nDETAIL:  Key (appid)=(220) already exists.\n\n[SQL: INSERT INTO steam_apps (name, appid, playing, favourite, updated) SELECT p0::VARCHAR, p1::INTEGER, p2::BOOLEAN, p3::BOOLEAN, p4::TIMESTAMP WITH TIME ZONE FROM (VALUES (%(name__0)s, %(appid__0)s, %(playing__0)s, %(favourite__0)s, %(updated__0)s, 0), ( ... 35383 characters truncated ...  sen_counter) ORDER BY sen_counter RETURNING steam_apps.id, steam_apps.added, steam_apps.id AS id__1]\n[parameters: {'appid__0': 220, 'name__0': None, 'playing__0': False, 'favourite__0': False, 'updated__0': None, 'appid__1': 320, 'name__1': None, 'playing__1': False, 'favourite__1': False, 'updated__1': None, 'appid__2': 360, 'name__2': None, 'playing__2': False, 'favourite__2': False, 'updated__2': None, 'appid__3': 6880, 'name__3': None, 'playing__3': False, 'favourite__3': False, 'updated__3': None, 'appid__4': 400, 'name__4': None, 'playing__4': False, 'favourite__4': False, 'updated__4': None, 'appid__5': 11450, 'name__5': None, 'playing__5': False, 'favourite__5': False, 'updated__5': None, 'appid__6': 21000, 'name__6': None, 'playing__6': False, 'favourite__6': False, 'updated__6': None, 'appid__7': 12200, 'name__7': None, 'playing__7': False, 'favourite__7': False, 'updated__7': None, 'appid__8': 9480, 'name__8': None, 'playing__8': False, 'favourite__8': False, 'updated__8': None, 'appid__9': 22330, 'name__9': None, 'playing__9': False, 'favourite__9': False, 'updated__9': None ... 1820 parameters truncated ... 'appid__374': 1180660, 'name__374': None, 'playing__374': False, 'favourite__374': False, 'updated__374': None, 'appid__375': 2494780, 'name__375': None, 'playing__375': False, 'favourite__375': False, 'updated__375': None, 'appid__376': 70, 'name__376': None, 'playing__376': False, 'favourite__376': False, 'updated__376': None, 'appid__377': 2725560, 'name__377': None, 'playing__377': False, 'favourite__377': False, 'updated__377': None, 'appid__378': 2727650, 'name__378': None, 'playing__378': False, 'favourite__378': False, 'updated__378': None, 'appid__379': 2737300, 'name__379': None, 'playing__379': False, 'favourite__379': False, 'updated__379': None, 'appid__380': 2824660, 'name__380': None, 'playing__380': False, 'favourite__380': False, 'updated__380': None, 'appid__381': 235900, 'name__381': None, 'playing__381': False, 'favourite__381': False, 'updated__381': None, 'appid__382': 2842040, 'name__382': None, 'playing__382': False, 'favourite__382': False, 'updated__382': None, 'appid__383': 1249970, 'name__383': None, 'playing__383': False, 'favourite__383': False, 'updated__383': None}]\n(Background on this error at: https://sqlalche.me/e/20/gkpj) (Background on this error at: https://sqlalche.me/e/20/7s2a)"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:46.384",
+        "type": "ERROR",
+        "source": "/workspace/database_handler.py",
+        "function": "insert_apps",
+        "log": "<class 'sqlalchemy.exc.PendingRollbackError'>: This Session's transaction has been rolled back due to a previous exception during flush. To begin a new transaction with this Session, first issue Session.rollback(). Original exception was: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint \"steam_apps_appid_key\"\nDETAIL:  Key (appid)=(220) already exists.\n\n[SQL: INSERT INTO steam_apps (name, appid, playing, favourite, updated) SELECT p0::VARCHAR, p1::INTEGER, p2::BOOLEAN, p3::BOOLEAN, p4::TIMESTAMP WITH TIME ZONE FROM (VALUES (%(name__0)s, %(appid__0)s, %(playing__0)s, %(favourite__0)s, %(updated__0)s, 0), ( ... 35383 characters truncated ...  sen_counter) ORDER BY sen_counter RETURNING steam_apps.id, steam_apps.added, steam_apps.id AS id__1]\n[parameters: {'appid__0': 220, 'name__0': None, 'playing__0': False, 'favourite__0': False, 'updated__0': None, 'appid__1': 320, 'name__1': None, 'playing__1': False, 'favourite__1': False, 'updated__1': None, 'appid__2': 360, 'name__2': None, 'playing__2': False, 'favourite__2': False, 'updated__2': None, 'appid__3': 6880, 'name__3': None, 'playing__3': False, 'favourite__3': False, 'updated__3': None, 'appid__4': 400, 'name__4': None, 'playing__4': False, 'favourite__4': False, 'updated__4': None, 'appid__5': 11450, 'name__5': None, 'playing__5': False, 'favourite__5': False, 'updated__5': None, 'appid__6': 21000, 'name__6': None, 'playing__6': False, 'favourite__6': False, 'updated__6': None, 'appid__7': 12200, 'name__7': None, 'playing__7': False, 'favourite__7': False, 'updated__7': None, 'appid__8': 9480, 'name__8': None, 'playing__8': False, 'favourite__8': False, 'updated__8': None, 'appid__9': 22330, 'name__9': None, 'playing__9': False, 'favourite__9': False, 'updated__9': None ... 1820 parameters truncated ... 'appid__374': 1180660, 'name__374': None, 'playing__374': False, 'favourite__374': False, 'updated__374': None, 'appid__375': 2494780, 'name__375': None, 'playing__375': False, 'favourite__375': False, 'updated__375': None, 'appid__376': 70, 'name__376': None, 'playing__376': False, 'favourite__376': False, 'updated__376': None, 'appid__377': 2725560, 'name__377': None, 'playing__377': False, 'favourite__377': False, 'updated__377': None, 'appid__378': 2727650, 'name__378': None, 'playing__378': False, 'favourite__378': False, 'updated__378': None, 'appid__379': 2737300, 'name__379': None, 'playing__379': False, 'favourite__379': False, 'updated__379': None, 'appid__380': 2824660, 'name__380': None, 'playing__380': False, 'favourite__380': False, 'updated__380': None, 'appid__381': 235900, 'name__381': None, 'playing__381': False, 'favourite__381': False, 'updated__381': None, 'appid__382': 2842040, 'name__382': None, 'playing__382': False, 'favourite__382': False, 'updated__382': None, 'appid__383': 1249970, 'name__383': None, 'playing__383': False, 'favourite__383': False, 'updated__383': None}]\n(Background on this error at: https://sqlalche.me/e/20/gkpj) (Background on this error at: https://sqlalche.me/e/20/7s2a)"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:46.386",
+        "type": "INFO",
+        "source": "/workspace/run.py",
+        "function": "build_apps_database",
+        "log": {
+            "game_count": 384,
+            "games_in_database": 384
+        }
+    },
+    {
+        "timestamp": "2025-06-04 20:17:47.740",
+        "type": "INFO",
+        "source": "/workspace/database_handler.py",
+        "function": "name_apps",
+        "log": "250762 in list - processing"
+    },
+    {
+        "timestamp": "2025-06-04 20:17:48.239",
+        "type": "INFO",
+        "source": "/workspace/database_handler.py",
+        "function": "name_apps",
+        "log": "Found 360 matches"
+    },
+    {
+        "timestamp": "2025-06-04 20:19:04.545",
+        "type": "WARNING",
+        "source": "/workspace/run.py",
+        "function": "lifespan",
+        "log": "App is closing down, goodbye!"
+    }
+]
