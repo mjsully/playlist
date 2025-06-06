@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import asyncio
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from neologger import NeoLogger
 
@@ -30,6 +31,13 @@ async def lifespan(app: FastAPI):
     neologger.log_this_warning("App is closing down, goodbye!")
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 async def build_apps_database():
 
