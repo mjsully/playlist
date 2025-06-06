@@ -42,7 +42,7 @@ class SteamPlaytime(Base):
         UniqueConstraint("appid", "playtime_forever", name="steam_playtime_constraint_1"),
     )
     id = Column(Integer, primary_key=True)
-    appid = Column(Integer, ForeignKey("steam_apps.appid"), unique=True)
+    appid = Column(Integer, ForeignKey("steam_apps.appid"))
     playtime_forever = Column(Integer)
     playtime_windows_forever = Column(Integer)
     playtime_mac_forever = Column(Integer)
