@@ -139,7 +139,6 @@ async def get_steam_user_recent():
             response = await client.get(url)
             response.raise_for_status()
             results = response.json()
-            print(results)
             results = results.get("response")
             return JSONResponse(
                 status_code=200,

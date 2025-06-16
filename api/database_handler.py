@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, UniqueConstraint, create_engine, func
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 import os
 from neologger import NeoLogger
@@ -51,6 +52,14 @@ class SteamPlaytime(Base):
     rtime_last_played = Column(Integer)
     playtime_disconnected = Column(Integer)
     added = Column(DateTime(timezone=True), server_default=func.now())
+
+    def to_dict(self, exclude: list[str] = None):
+
+        return {
+            column.name: getattr(self, column.name)
+            for column in self.__table__.columns
+            if column.name not in exclude
+        }
 
 class DatabaseHandler:
 
@@ -156,11 +165,18 @@ class DatabaseHandler:
             session.commit()
         except IntegrityError as ex1:
             self.logger.log_this_error(f"{type(ex1)}: {ex1}")
+            session.rollback()
         except Exception as ex2:
             self.logger.log_this_error(f"{type(ex2)}: {ex2}")
+            session.rollback()
 
         try:
-            session.add_all(playtime_inserts)
+            # session.add_all(playtime_inserts)
+            # session.commit()
+            playtime_inserts = [obj.to_dict(exclude=["id", "added"]) for obj in playtime_inserts]
+            stmt = insert(SteamPlaytime).values(playtime_inserts)
+            stmt = stmt.on_conflict_do_nothing(constraint="steam_playtime_constraint_1")
+            session.execute(stmt)
             session.commit()
         except IntegrityError as ex1:
             self.logger.log_this_error(f"{type(ex1)}: {ex1}")
