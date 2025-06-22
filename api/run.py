@@ -13,6 +13,7 @@ import database_handler
 neologger = NeoLogger("Playlist API")
 
 dbh = database_handler.DatabaseHandler()
+cache = database_handler.DataCache()
 
 load_dotenv()
 
@@ -104,6 +105,7 @@ async def get_steam_user_status():
     url = f"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={steam_api_key}&steamids={steam_user_id}"
 
     results = None
+    attempt_cache = True
     async with httpx.AsyncClient() as client:
 
         try:
@@ -112,17 +114,37 @@ async def get_steam_user_status():
             response.raise_for_status()
             results = response.json()
             results = results.get("response").get("players")[0]
+            cache.set("steam/user/status", results)
             return JSONResponse(
                 status_code=200,
                 content=results
             )
         
-        except Exception as ex:
-            neologger.log_this_error(f"{type(ex)}: {ex}")
+        except httpx.HTTPStatusError as ex1:
+            if ex1.response.status_code == 429 and attempt_cache:
+                cached_data = cache.get("/steam/user/status")
+                if cached_data:
+                    return JSONResponse(
+                        status_code=200,
+                        content=cached_data.get("data")
+                    )
+                return JSONResponse(
+                    status_code=204,
+                    content={}
+                )
+            return JSONResponse(
+                status_code=ex1.response.status_code,
+                content={
+                    "error": ex1.response.text
+                }
+            )
+                
+        except Exception as ex2:
+            neologger.log_this_error(f"{type(ex2)}: {ex2}")
             return JSONResponse(
                 status_code=500,
                 content={
-                    "error": f"{type(ex)}: {ex}"
+                    "error": f"{type(ex2)}: {ex2}"
                 }
             )
         
@@ -132,6 +154,7 @@ async def get_steam_user_recent():
     url = f"http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key={steam_api_key}&steamid={steam_user_id}&format=json"
 
     results = None
+    attempt_cache = True
     async with httpx.AsyncClient() as client:
 
         try:
@@ -140,16 +163,36 @@ async def get_steam_user_recent():
             response.raise_for_status()
             results = response.json()
             results = results.get("response")
+            cache.set("steam/user/recent", results)
             return JSONResponse(
                 status_code=200,
                 content=results
             )
         
-        except Exception as ex:
-            neologger.log_this_error(f"{type(ex)}: {ex}")
+        except httpx.HTTPStatusError as ex1:
+            if ex1.response.status_code == 429 and attempt_cache:
+                cached_data = cache.get("/steam/user/recent")
+                if cached_data:
+                    return JSONResponse(
+                        status_code=200,
+                        content=cached_data.get("data")
+                    )
+                return JSONResponse(
+                    status_code=204,
+                    content={}
+                )
+            return JSONResponse(
+                status_code=ex1.response.status_code,
+                content={
+                    "error": ex1.response.text
+                }
+            )
+                
+        except Exception as ex2:
+            neologger.log_this_error(f"{type(ex2)}: {ex2}")
             return JSONResponse(
                 status_code=500,
                 content={
-                    "error": f"{type(ex)}: {ex}"
+                    "error": f"{type(ex2)}: {ex2}"
                 }
             )

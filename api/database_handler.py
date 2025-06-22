@@ -9,6 +9,8 @@ from neologger import NeoLogger
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.exc import IntegrityError
 
+from datetime import datetime
+
 class Base(DeclarativeBase):
     pass
 
@@ -60,6 +62,41 @@ class SteamPlaytime(Base):
             for column in self.__table__.columns
             if column.name not in exclude
         }
+    
+
+    
+class DataCache:
+
+    def __init__(self):
+
+        self.logger = NeoLogger("DatabaseHandler")
+        self.cache = {}
+
+    def set(self, name, data):
+
+        dt = datetime.now()
+        if name not in self.cache:
+            self.cache[name] = {
+                "added": dt,
+                "updated": dt,
+                "data": data
+            }
+        else:
+            self.cache[name]["updated"] = dt
+            self.cache[name]["data"] = data
+
+    def get(self, name):
+
+        return self.cache.get(name, None)
+    
+    def getall(self):
+
+        return self.cache
+    
+    def delete(self, name):
+
+        self.cache.pop(name)
+
 
 class DatabaseHandler:
 
@@ -164,7 +201,7 @@ class DatabaseHandler:
             session.add_all(app_inserts)
             session.commit()
         except IntegrityError as ex1:
-            self.logger.log_this_error(f"{type(ex1)}: {ex1}")
+            self.logger.log_this_error(f"{type(ex1)}")
             session.rollback()
         except Exception as ex2:
             self.logger.log_this_error(f"{type(ex2)}: {ex2}")
@@ -179,7 +216,7 @@ class DatabaseHandler:
             session.execute(stmt)
             session.commit()
         except IntegrityError as ex1:
-            self.logger.log_this_error(f"{type(ex1)}: {ex1}")
+            self.logger.log_this_error(f"{type(ex1)}")
         except Exception as ex2:
             self.logger.log_this_error(f"{type(ex2)}: {ex2}")
             
