@@ -122,11 +122,18 @@ async def get_steam_user_status():
         except httpx.HTTPStatusError as ex1:
             if ex1.response.status_code == 429 and attempt_cache:
                 cached_data = cache.get("/steam/user/status")
-                if cached_data:
+                if cached_data is not None:
                     return JSONResponse(
                         status_code=200, content=cached_data.get("data")
                     )
-            return Response(status_code=204)
+                return Response(status_code=204)
+
+            return JSONResponse(
+                status_code=ex1.response.status_code,
+                content={
+                    "error": "Something went wrong"
+                }
+            )
 
         except Exception as ex2:
             neologger.log_this_error(f"{type(ex2)}: {ex2}")
@@ -156,7 +163,7 @@ async def get_steam_user_recent():
         except httpx.HTTPStatusError as ex1:
             if ex1.response.status_code == 429 and attempt_cache:
                 cached_data = cache.get("/steam/user/recent")
-                if cached_data:
+                if cached_data is not None:
                     return JSONResponse(
                         status_code=200, content=cached_data.get("data")
                     )
