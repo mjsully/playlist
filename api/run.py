@@ -8,19 +8,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from neologger import NeoLogger
+import redis
 
 import database_handler
 
 neologger = NeoLogger("Playlist API")
 
 dbh = database_handler.DatabaseHandler()
-cache = database_handler.DataCache()
 
 load_dotenv()
 
 steam_api_key = os.getenv("STEAM_API_KEY", None)
 steam_user_id = os.getenv("STEAM_USER_ID", None)
+redis_host = os.getenv("REDIS_HOST", None)
 
+r = redis.Redis(host=redis_host, port=6379, decode_responses=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,6 +35,7 @@ async def lifespan(app: FastAPI):
     dbh.create_tables()
     await build_apps_database()
     yield
+    r.flushall()
     neologger.log_this_warning("App is closing down, goodbye!")
 
 
@@ -116,23 +119,22 @@ async def get_steam_user_status():
             response.raise_for_status()
             results = response.json()
             results = results.get("response").get("players")[0]
-            cache.set("steam/user/status", results)
+            # cache.set("steam/user/status", results)
+            r.hset("/steam/user/status", mapping=results)
             return JSONResponse(status_code=200, content=results)
 
         except httpx.HTTPStatusError as ex1:
             if ex1.response.status_code == 429 and attempt_cache:
-                cached_data = cache.get("/steam/user/status")
-                if cached_data is not None:
+                if r.exists("/steam/user/status"):
+                    neologger.log_this_success("Grabbing cached data for /steam/user/status")
                     return JSONResponse(
-                        status_code=200, content=cached_data.get("data")
+                        status_code=200, content=r.hgetall("/steam/user/status")
                     )
                 return Response(status_code=204)
 
             return JSONResponse(
                 status_code=ex1.response.status_code,
-                content={
-                    "error": "Something went wrong"
-                }
+                content={"error": "Something went wrong"},
             )
 
         except Exception as ex2:
@@ -157,15 +159,15 @@ async def get_steam_user_recent():
             response.raise_for_status()
             results = response.json()
             results = results.get("response")
-            cache.set("steam/user/recent", results)
+            r.hset("/steam/user/recent", mapping=results)
             return JSONResponse(status_code=200, content=results)
 
         except httpx.HTTPStatusError as ex1:
             if ex1.response.status_code == 429 and attempt_cache:
-                cached_data = cache.get("/steam/user/recent")
-                if cached_data is not None:
+                if r.exists("/steam/user/recent"):
+                    neologger.log_this_success("Grabbing cached data for /steam/user/recent")
                     return JSONResponse(
-                        status_code=200, content=cached_data.get("data")
+                        status_code=200, content=r.hgetall("/steam/user/recent")
                     )
                 return Response(status_code=204)
 

@@ -65,37 +65,37 @@ class SteamPlaytime(Base):
     
 
     
-class DataCache:
+# class DataCache:
 
-    def __init__(self):
+#     def __init__(self):
 
-        self.logger = NeoLogger("DatabaseHandler")
-        self.cache = {}
+#         self.logger = NeoLogger("DatabaseHandler")
+#         self.cache = {}
 
-    def set(self, name, data):
+#     def set(self, name, data):
 
-        dt = datetime.now()
-        if name not in self.cache:
-            self.cache[name] = {
-                "added": dt,
-                "updated": dt,
-                "data": data
-            }
-        else:
-            self.cache[name]["updated"] = dt
-            self.cache[name]["data"] = data
+#         dt = datetime.now()
+#         if not r.exists(name):
+#             self.cache[name] = {
+#                 "added": dt,
+#                 "updated": dt,
+#                 "data": data
+#             }
+#         else:
+#             self.cache[name]["updated"] = dt
+#             self.cache[name]["data"] = data
 
-    def get(self, name):
+#     def get(self, name):
 
-        return self.cache.get(name, None)
+#         return self.cache.get(name, None)
     
-    def getall(self):
+#     def getall(self):
 
-        return self.cache
+#         return self.cache
     
-    def delete(self, name):
+#     def delete(self, name):
 
-        self.cache.pop(name)
+#         self.cache.pop(name)
 
 
 class DatabaseHandler:
