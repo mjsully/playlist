@@ -1,14 +1,15 @@
 import asyncio
+import json
 import os
 from contextlib import asynccontextmanager
 
 import httpx
+import redis
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from neologger import NeoLogger
-import redis
 
 import database_handler
 
@@ -23,6 +24,7 @@ steam_user_id = os.getenv("STEAM_USER_ID", None)
 redis_host = os.getenv("REDIS_HOST", None)
 
 r = redis.Redis(host=redis_host, port=6379, decode_responses=True)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -126,10 +128,11 @@ async def get_steam_user_status():
         except httpx.HTTPStatusError as ex1:
             if ex1.response.status_code == 429 and attempt_cache:
                 if r.exists("/steam/user/status"):
-                    neologger.log_this_success("Grabbing cached data for /steam/user/status")
-                    return JSONResponse(
-                        status_code=200, content=r.hgetall("/steam/user/status")
+                    neologger.log_this_success(
+                        "Grabbing cached data for /steam/user/status"
                     )
+                    cached_data = r.hgetall("/steam/user/status")
+                    return JSONResponse(status_code=200, content=cached_data)
                 return Response(status_code=204)
 
             return JSONResponse(
@@ -159,16 +162,17 @@ async def get_steam_user_recent():
             response.raise_for_status()
             results = response.json()
             results = results.get("response")
-            r.hset("/steam/user/recent", mapping=results)
+            r.set("/steam/user/recent", json.dumps(results))
             return JSONResponse(status_code=200, content=results)
 
         except httpx.HTTPStatusError as ex1:
             if ex1.response.status_code == 429 and attempt_cache:
                 if r.exists("/steam/user/recent"):
-                    neologger.log_this_success("Grabbing cached data for /steam/user/recent")
-                    return JSONResponse(
-                        status_code=200, content=r.hgetall("/steam/user/recent")
+                    neologger.log_this_success(
+                        "Grabbing cached data for /steam/user/recent"
                     )
+                    cached_data = json.loads(r.get("/steam/user/recent"))
+                    return JSONResponse(status_code=200, content=cached_data)
                 return Response(status_code=204)
 
             return JSONResponse(
