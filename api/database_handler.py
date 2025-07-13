@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, UniqueConstraint, create_engine, func
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 import os
 from neologger import NeoLogger
 
@@ -100,8 +100,26 @@ class DatabaseHandler:
     async def get_apps(self):
 
         _, session = self.get_engine_session()
-        apps = session.query(SteamApps).all()
-        return [i.to_dict() for i in apps]
+
+        playtime_alias = aliased(SteamPlaytime)
+
+        results = (
+            session.query(
+                SteamApps,
+                func.max(playtime_alias.playtime_forever).label("playtime_forever")
+            )
+            .outerjoin(playtime_alias, SteamApps.appid == playtime_alias.appid)
+            .group_by(SteamApps.id)
+            .all()
+        )
+
+        return [
+            {
+                **app.to_dict(),
+                "playtime_forever": playtime_forever
+            }
+            for app, playtime_forever in results
+        ]
     
     async def name_apps(self, names):
 
