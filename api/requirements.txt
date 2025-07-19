@@ -6,4 +6,4 @@ sqlalchemy
 tqdm
 neologger
 psycopg2-binary
-redis
+cachetools

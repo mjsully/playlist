@@ -9,10 +9,10 @@ services:
       - ./data/:/usr/src/app/data
     env_file: .env
     command: "uvicorn server:app --host 0.0.0.0"
-  cache:
-    image: redis:7.4-alpine
-    container_name: redis
-    ports:
-      - 6379:6379
+  # cache:
+  #   image: redis:7.4-alpine
+  #   container_name: redis
+  #   ports:
+  #     - 6379:6379
 volumes:
   steam-api-data:
