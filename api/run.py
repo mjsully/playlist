@@ -116,6 +116,13 @@ async def get_steam_user_apps():
     return JSONResponse(status_code=200, content=apps)
 
 
+@app.get("/steam/user/app/{appid}")
+async def get_steam_user_apps(appid: int):
+
+    apps = await dbh.get_app(appid)
+    return JSONResponse(status_code=200, content=apps)
+
+
 @app.get("/steam/user/status")
 async def get_steam_user_status():
 

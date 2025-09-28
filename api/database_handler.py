@@ -120,6 +120,31 @@ class DatabaseHandler:
             }
             for app, playtime_forever in results
         ]
+
+    async def get_app(self, appid: int):
+
+        _, session = self.get_engine_session()
+
+        playtime_alias = aliased(SteamPlaytime)
+
+        results = (
+            session.query(
+                SteamApps,
+                func.max(playtime_alias.playtime_forever).label("playtime_forever")
+            )
+            .outerjoin(playtime_alias, SteamApps.appid == playtime_alias.appid)
+            .group_by(SteamApps.id)
+            .where(SteamApps.id == appid)
+            .all()
+        )
+
+        return [
+            {
+                **app.to_dict(),
+                "playtime_forever": playtime_forever
+            }
+            for app, playtime_forever in results
+        ]
     
     async def name_apps(self, names):
 

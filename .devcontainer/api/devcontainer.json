@@ -1,9 +1,0 @@
-{
-	"name": "playlist-api",
-	"image": "python:3.13-alpine",
-	"workspaceMount": "source=${localWorkspaceFolder}/api,target=/workspace,type=bind",
-	"workspaceFolder": "/workspace",
-	"postCreateCommand": "apk add git && pip install -r requirements-dev.txt"
-}
-  
-  
