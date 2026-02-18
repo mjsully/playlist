@@ -63,7 +63,7 @@ def set_cached(key, value):
 
 async def build_apps_database():
 
-    url = f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={steam_api_key}&steamid={steam_user_id}"
+    url = f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={steam_api_key}&steamid={steam_user_id}&include_appinfo=true"
 
     async with httpx.AsyncClient() as client:
 
@@ -79,20 +79,24 @@ async def build_apps_database():
 
             await asyncio.sleep(5)
 
-    url = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
+    # url = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
+    # url = f"https://api.steampowered.com/IStoreService/GetAppList/v1/?key={steam_api_key}&max_results=50000"
 
-    async with httpx.AsyncClient() as client:
+    # async with httpx.AsyncClient() as client:
 
-        results = None
-        response = await client.get(url)
-        if response.status_code == 200:
+    #     results = None
+    #     response = await client.get(url)
+    #     if response.status_code == 200:
 
-            results = response.json()
-            await asyncio.create_task(dbh.name_apps(results))
+    #         results = response.json()
+    #         # print(results["response"]["last_appid"])
+    #         # print(results["response"]["more_results"])
+            
+    #         await asyncio.create_task(dbh.name_apps(results))
 
-        else:
+    #     else:
 
-            neologger.log_this_error(f"{response.status_code}: {response.text}")
+    #         neologger.log_this_error(f"{response.status_code}: {response.text}")
 
 
 @app.get("/")

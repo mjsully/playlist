@@ -32,6 +32,7 @@ class SteamUserAppsPlaytime(Base):
         UniqueConstraint("appid", "playtime_forever", name="steam_user_apps_playtime_constraint_1"),
     )
     id: Mapped[int] = mapped_column(primary_key=True)
+    name = mapped_column(String)
     appid = mapped_column(Integer, ForeignKey("steam_apps.appid"))
     playtime_forever = mapped_column(Integer)
     playtime_windows = mapped_column(Integer)

@@ -148,7 +148,7 @@ class DatabaseHandler:
     
     async def name_apps(self, names):
 
-        names = names.get("applist")
+        names = names.get("response")
         names = names.get("apps")
         apps = await self.get_apps()
         appids = [appid.get("appid") for appid in apps]
@@ -188,6 +188,7 @@ class DatabaseHandler:
             playtime_inserts = []
             for entry in games:
                 app = SteamApps(
+                    name=entry.get("name"),
                     appid=entry.get("appid")
                 )
                 app_inserts.append(app)

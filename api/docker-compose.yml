@@ -8,11 +8,17 @@ services:
     volumes:
       - ./data/:/usr/src/app/data
     env_file: .env
-    command: "uvicorn server:app --host 0.0.0.0"
+    # command: "uvicorn run:app --host 0.0.0.0"
   # cache:
   #   image: redis:7.4-alpine
   #   container_name: redis
   #   ports:
   #     - 6379:6379
+  db:
+    image: postgres:16
+    ports: 
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=postgres
 volumes:
   steam-api-data:
