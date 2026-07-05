@@ -44,7 +44,7 @@ type Response struct {
 
 type RecentListApps struct {
 	GameCount int       `json:"total_count"`
-	Apps      []AppItem `json:"games"`
+	Apps      []RecentItem `json:"games"`
 }
 
 type RecentItem struct {
