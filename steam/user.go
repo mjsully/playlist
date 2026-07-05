@@ -91,8 +91,8 @@ func GetUserSummary(c *gin.Context) {
 	}
 
 	if cached, found := userCache.Get(steamId); found {
-		fmt.Println("/user/ cache hit")
-		c.JSON(http.StatusOK, cached.(UserSummaryResponse))
+		slog.Info("/steam/user/summary cache hit")
+		c.JSON(http.StatusOK, cached.(UserSummaryResponse).Response.Players[0])
 		return
 	}
 
