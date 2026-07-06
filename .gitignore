@@ -1,5 +1,1 @@
 .env
-api/data/
-api/__pycache__
-ui/.next
-ui/node_modules

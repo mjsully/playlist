@@ -1,9 +1,0 @@
-fastapi
-httpx
-uvicorn[standard]
-requests
-sqlalchemy
-tqdm
-neologger
-psycopg2-binary
-cachetools

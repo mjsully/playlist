@@ -1,0 +1,60 @@
+{{define "apps_table"}}
+<input type="hidden" name="sort" value="{{.Sort}}">
+<input type="hidden" name="dir" value="{{.Dir}}">
+<div class="table-meta">{{len .Apps}} game{{if ne (len .Apps) 1}}s{{end}}</div>
+<table class="apps-table">
+  <thead>
+    <tr>
+      <th class="icon-col"></th>
+      {{range .Headers}}
+      <th>
+        <a href="#"
+           class="sort-link{{if .Arrow}} sort-active{{end}}"
+           hx-get="/apps?sort={{.Key}}&dir={{.NextDir}}"
+           hx-include="#filters"
+           hx-target="#apps-table"
+           hx-swap="innerHTML">{{.Label}} <span class="arrow">{{.Arrow}}</span></a>
+      </th>
+      {{end}}
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Apps}}
+    <tr>
+      <td class="icon-col">
+        {{if .ImgIconUrl}}<img class="app-icon" loading="lazy" alt=""
+          src="https://media.steampowered.com/steamcommunity/public/images/apps/{{.Appid}}/{{.ImgIconUrl}}.jpg">{{end}}
+      </td>
+      <td class="name-col">{{.Name}}</td>
+      <td class="num-col">{{hours .PlaytimeForever}}h</td>
+      <td class="num-col">{{lastPlayed .RtimeLastPlayed}}</td>
+      <td class="check-col">
+        <input type="checkbox" class="row-check" {{if .Queue}}checked{{end}}
+          hx-post="/apps/{{.ID}}/flag/queue"
+          hx-trigger="change"
+          hx-vals="js:{value: event.target.checked}"
+          hx-swap="none">
+      </td>
+      <td class="check-col">
+        <input type="checkbox" class="row-check" {{if .NowPlaying}}checked{{end}}
+          hx-post="/apps/{{.ID}}/flag/now_playing"
+          hx-trigger="change"
+          hx-vals="js:{value: event.target.checked}"
+          hx-swap="none">
+      </td>
+      <td class="check-col">
+        <input type="checkbox" class="row-check" {{if .Favourite}}checked{{end}}
+          hx-post="/apps/{{.ID}}/flag/favourite"
+          hx-trigger="change"
+          hx-vals="js:{value: event.target.checked}"
+          hx-swap="none">
+      </td>
+    </tr>
+    {{else}}
+    <tr>
+      <td class="empty-row" colspan="7">No apps found.</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}
