@@ -95,15 +95,25 @@ func InitDB() {
 
 func CreateApp(app []App) error {
 	err := DB.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "appid"}}, // Your unique constraint columns
-		DoNothing: true,
+		Columns:   []clause.Column{{Name: "appid"}},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"img_icon_url",
+			"playtime_forever", 
+			"playtime_windows_forever",
+			"playtime_mac_forever",
+			"playtime_linux_forever",
+			"playtime_deck_forever",
+			"rtime_last_played",
+			"playtime_disconnected",
+			"updated_at",
+		}),
 	}).Create(&app).Error
 	return err
 }
 
 func CreatePlaytime(playtime []Playtime) error {
 	err := DB.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "appid"}, {Name: "playtime_forever"}}, // Your unique constraint columns
+		Columns:   []clause.Column{{Name: "appid"}, {Name: "playtime_forever"}},
 		DoNothing: true,
 	}).Create(&playtime).Error
 	return err
