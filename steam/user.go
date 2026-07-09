@@ -40,6 +40,8 @@ type UserSummary struct {
 	PrimaryClanId            string `json:"primaryclanid"`
 	TimeCreated              int    `json:"timecreated"`
 	PersonaStateFlags        int    `json:"personastateflags"`
+	GameID					 string `json:"gameid"`
+	GameExtraInfo		     string `json:"gameextrainfo"`
 }
 
 func querySteamApi(c *gin.Context, apiKey string, steamId string) (*UserSummaryResponse, error) {
