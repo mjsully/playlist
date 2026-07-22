@@ -26,9 +26,30 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
   .page { max-width: 1000px; margin: 0 auto; }
-  .page-header { margin-bottom: 1.5rem; }
+  .page-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
   .page-header h1 { margin: 0 0 0.25rem; font-size: 1.75rem; }
   .subtitle { margin: 0; color: var(--muted); }
+  .refresh-btn {
+    flex: 0 0 auto;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .filters {
     display: flex;
     flex-wrap: wrap;
@@ -125,8 +146,16 @@
 <body>
   <div class="page">
     <header class="page-header">
-      <h1>Steam Library</h1>
-      <p class="subtitle">Browse, sort and tag your library</p>
+      <div>
+        <h1>Steam Library</h1>
+        <p class="subtitle">Browse, sort and tag your library</p>
+      </div>
+      <button type="button" class="refresh-btn"
+              hx-get="/steam/apps"
+              hx-swap="none"
+              hx-disabled-elt="this">
+        Refresh
+      </button>
     </header>
     <form id="filters" class="filters"
           hx-get="/apps"
@@ -148,7 +177,11 @@
         Favourites
       </label>
     </form>
-    <div id="apps-table" class="card">
+    <div id="apps-table" class="card"
+         hx-get="/apps"
+         hx-include="#filters, [name='sort'], [name='dir']"
+         hx-trigger="apps-refreshed from:body"
+         hx-swap="innerHTML">
       {{template "apps_table" .}}
     </div>
   </div>
