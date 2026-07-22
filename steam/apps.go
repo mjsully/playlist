@@ -160,6 +160,7 @@ func GetAppsList(c *gin.Context) {
 	slog.Info("Successfully updated apps", "GameCount", totalEntries, "TotalPlaytime", totalPlayTime)
 	r := Response{GameCount: totalEntries, TotalPlayTime: totalPlayTime}
 
+	c.Header("HX-Trigger", "apps-refreshed")
 	c.JSON(http.StatusOK, r)
 
 }
